@@ -1,0 +1,140 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const CookieClickerApp());
+}
+
+class CookieClickerApp extends StatelessWidget {
+  const CookieClickerApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Cookie Clicker',
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
+      ),
+      home: const CookieClickerPage(),
+    );
+  }
+}
+
+class CookieClickerPage extends StatefulWidget {
+  const CookieClickerPage({Key? key}) : super(key: key);
+
+  @override
+  CookieClickerPageState createState() => CookieClickerPageState();
+}
+
+class CookieClickerPageState extends State<CookieClickerPage> with SingleTickerProviderStateMixin {
+  int _cookieCount = 0;
+  final int _maxClicks = 70; // Nombre maximum de clics
+  bool _isGameOver = false; // Indique si le jeu est terminé
+
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 1.0, end: 1.2).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _incrementCookieCount() {
+    if (_isGameOver) return; // Ne fait rien si le jeu est terminé
+
+    setState(() {
+      if (_cookieCount < _maxClicks) {
+        _cookieCount++;
+        _controller.forward().then((_) {
+          _controller.reverse();
+        });
+
+        // Vérifie si le nombre maximum de clics est atteint
+        if (_cookieCount >= _maxClicks) {
+          _isGameOver = true;
+        }
+      }
+    });
+  }
+
+  void _restartGame() {
+    setState(() {
+      _cookieCount = 0;
+      _isGameOver = false;
+      // Réinitialiser l'animation si nécessaire
+      _controller.reset();
+      _controller.forward().then((_) {
+        _controller.reverse();
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int _clicksRemaining = _maxClicks - _cookieCount;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Cookie Clicker'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Cookies: $_cookieCount',
+              style: const TextStyle(fontSize: 24),
+            ),
+            Text(
+              'Clicks restants: $_clicksRemaining',
+              style: const TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 20),
+            _isGameOver
+                ? Column(
+                    children: [
+                      const Text(
+                        'Terminé',
+                        style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _restartGame,
+                        child: const Text('Restart'),
+                      ),
+                    ],
+                  )
+                : GestureDetector(
+                    onTap: _incrementCookieCount,
+                    child: AnimatedBuilder(
+                      animation: _animation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _animation.value,
+                          child: child,
+                        );
+                      },
+                      child: Image.asset(
+                        'assets/cookie.png',
+                        width: 200,
+                        height: 200,
+                      ),
+                    ),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
