@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_page.dart'; // Import de la page de connexion
 
 void main() {
   runApp(const CookieClickerApp());
@@ -14,7 +15,7 @@ class CookieClickerApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.brown,
       ),
-      home: const CookieClickerPage(),
+      home: const LoginPage(), // Démarre sur la page de connexion
     );
   }
 }
@@ -28,8 +29,8 @@ class CookieClickerPage extends StatefulWidget {
 
 class CookieClickerPageState extends State<CookieClickerPage> with SingleTickerProviderStateMixin {
   int _cookieCount = 0;
-  final int _maxClicks = 70; // Nombre maximum de clics
-  bool _isGameOver = false; // Indique si le jeu est terminé
+  final int _maxClicks = 70;
+  bool _isGameOver = false;
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -51,7 +52,7 @@ class CookieClickerPageState extends State<CookieClickerPage> with SingleTickerP
   }
 
   void _incrementCookieCount() {
-    if (_isGameOver) return; // Ne fait rien si le jeu est terminé
+    if (_isGameOver) return;
 
     setState(() {
       if (_cookieCount < _maxClicks) {
@@ -60,7 +61,6 @@ class CookieClickerPageState extends State<CookieClickerPage> with SingleTickerP
           _controller.reverse();
         });
 
-        // Vérifie si le nombre maximum de clics est atteint
         if (_cookieCount >= _maxClicks) {
           _isGameOver = true;
         }
@@ -72,7 +72,6 @@ class CookieClickerPageState extends State<CookieClickerPage> with SingleTickerP
     setState(() {
       _cookieCount = 0;
       _isGameOver = false;
-      // Réinitialiser l'animation si nécessaire
       _controller.reset();
       _controller.forward().then((_) {
         _controller.reverse();
@@ -87,6 +86,18 @@ class CookieClickerPageState extends State<CookieClickerPage> with SingleTickerP
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cookie Clicker'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              // Lorsqu'on appuie sur le bouton déconnexion, on revient à la page de connexion
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
